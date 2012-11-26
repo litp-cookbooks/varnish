@@ -1,3 +1,4 @@
+name             "varnish"
 maintainer       "Living in the Past"
 maintainer_email "sax@livinginthepast.org"
 license          "Apache 2.0"

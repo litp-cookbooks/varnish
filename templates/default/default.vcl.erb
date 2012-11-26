@@ -1,0 +1,39 @@
+<% @backends.each do |backend| %>
+  backend <%= backend["name"] %> {
+  .host = "<%= backend["host"] %>";
+  .port = "<%= backend["port"] %>";
+  <% if backend["probe"] %>
+    .probe = {
+    .url = <%= backend["probe"]["url"] %>;
+    .interval = <%= backend["probe"]["interval"] %>;
+    .timeout = <%= backend["probe"]["timeout"] %>;
+    .window = <%= backend["probe"]["window"] %>;
+    .threshold = <%= backend["probe"]["threshold"] %>;
+    }
+  <% end %>
+  }
+<% end %>
+
+<% if @recv["content"] %>
+  sub vcl_recv {
+    <% @recv["content"].each do |line| %>
+    <%= line %>
+    <% end %>
+  }
+<% end %>
+
+<% if @fetch["content"] %>
+  sub vcl_fetch {
+    <% @fetch["content"].each do |line| %>
+    <%= line %>
+    <% end %>
+  }
+<% end %>
+
+<% if @deliver["content"] %>
+  sub vcl_deliver {
+    <% @deliver["content"].each do |line| %>
+    <%= line %>
+    <% end %>
+  }
+<% end %>

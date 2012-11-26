@@ -16,3 +16,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+package node["varnish"]["packages"]
+
+backends = node["varnish"]["backends"]
+
+recv = fetch = deliver = {}
+recv = data_bag_item("varnish", "recv") rescue nil
+fetch = data_bag_item("varnish", "fetch") rescue nil
+deliver = data_bag_item("varnish", "deliver") rescue nil
+
+template node["varnish"]["vcl"] do
+  source "default.vcl.erb"
+  cookbook "varnish"
+  owner "root"
+  group "root"
+  mode 0644
+  variables(
+      "backends" => backends,
+      "recv" => recv,
+      "fetch" => fetch,
+      "deliver" => deliver
+  )
+  notifies :reload, "service[varnish]"
+end
+
+template node["varnish"]["secret"] do
+  source "secret.erb"
+  cookbook "varnish"
+  owner "root"
+  group "root"
+  mode 0600
+  variables "secret" => node["varnish"]["management_interface"]["secret"]
+end
+
+execute "verify varnish configuration" do
+  command "varnishd -C -f #{node["varnish"]["vcl"]} | grep -v 'exit 1'"
+end
+
+service "varnish" do
+  supports :enable => true, :reload => true
+  action [:enable, :start]
+end
